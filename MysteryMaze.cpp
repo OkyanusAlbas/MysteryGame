@@ -6,8 +6,8 @@
 #include <algorithm> // For std::swap
 
 // Define constants for the maze dimensions
-const int WIDTH = 64;
-const int HEIGHT = 64;
+const int WIDTH = 20;
+const int HEIGHT = 20;
 
 // 2D array representing the maze
 char maze[HEIGHT][WIDTH];
