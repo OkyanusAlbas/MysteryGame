@@ -129,11 +129,15 @@ void movePlayer(char direction) {
     if (maze[newY][newX] != '#' && maze[newY][newX] != 'E') {
         if (maze[newY][newX] == 'L') {
             // The player is trying to move to a puzzle block
-            std::cout << "Puzzle: What is 5 + 3? ";
+            int num1 = rand() % 100 + 1;
+            int num2 = rand() % 100 + 1;
+            int correctAnswer = num1 + num2;
+
+            std::cout << "Puzzle: What is " << num1 << " + " << num2 << "? ";
             int answer;
             std::cin >> answer;
 
-            if (answer == 8) {
+            if (answer == correctAnswer) {
                 std::cout << "Correct! You may pass.\n";
                 maze[newY][newX] = ' ';  // Remove the puzzle block
             } else {
