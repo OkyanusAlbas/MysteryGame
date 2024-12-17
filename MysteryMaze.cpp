@@ -1,6 +1,4 @@
 #include <iostream>
-#include <vector>
-#include <stack>
 #include <cstdlib>
 #include <ctime>
 #include <chrono>
@@ -17,7 +15,6 @@ char maze[HEIGHT][WIDTH];  // Maze array
 struct Enemy {
     int x, y;
     void moveRandomly() {
-        // Random move for the enemy (simple random walk, for demonstration)
         int direction = rand() % 4;
         if (direction == 0 && y > 1) y--; // Move up
         else if (direction == 1 && y < HEIGHT - 2) y++; // Move down
@@ -26,7 +23,7 @@ struct Enemy {
     }
 };
 
-// Function to generate the maze
+// Function to generate the maze with 2-block wide corridors
 void generateMaze(int startX, int startY) {
     // Fill maze with walls ('#')
     for (int i = 0; i < HEIGHT; ++i) {
@@ -35,15 +32,33 @@ void generateMaze(int startX, int startY) {
         }
     }
 
-    // Create a simple path for the player (a very basic maze)
-    maze[startY][startX] = ' ';
-    maze[exitY][exitX] = 'X'; // Place exit
+    // Ensure the exit position is always valid and does not get overwritten
+    maze[exitY][exitX] = 'X';  // Exit is placed here
 
-    // Randomized walls and paths (you can improve this part to generate better mazes)
-    for (int i = 2; i < WIDTH - 2; i++) {
-        for (int j = 2; j < HEIGHT - 2; j++) {
-            if (rand() % 3 == 0) {
+    // Create corridors (2-block wide)
+    for (int i = 1; i < WIDTH - 1; i += 3) {  // Step by 3 to ensure at least 2-block wide corridors
+        for (int j = 1; j < HEIGHT - 1; ++j) {
+            maze[j][i] = ' ';
+            maze[j][i + 1] = ' ';
+        }
+    }
+
+    for (int i = 1; i < HEIGHT - 1; i += 3) {  // Step by 3 to ensure at least 2-block wide corridors
+        for (int j = 1; j < WIDTH - 1; ++j) {
+            maze[i][j] = ' ';
+            maze[i + 1][j] = ' ';
+        }
+    }
+
+    // Ensure that the player's starting position is valid
+    maze[startY][startX] = ' ';
+
+    // Optional: Randomly clear out some more paths, ensuring 2-block wide corridors
+    for (int i = 3; i < WIDTH - 3; ++i) {
+        for (int j = 3; j < HEIGHT - 3; ++j) {
+            if (rand() % 4 == 0) {
                 maze[j][i] = ' ';
+                maze[j + 1][i] = ' ';
             }
         }
     }
@@ -51,7 +66,12 @@ void generateMaze(int startX, int startY) {
 
 // Function to display the maze
 void displayMaze() {
-    system("clear"); // Use "cls" on Windows instead of "clear" for clearing the console
+    #ifdef _WIN32
+        system("cls"); // Use "cls" for Windows
+    #else
+        system("clear"); // Use "clear" for Unix-based systems
+    #endif
+
     for (int i = 0; i < HEIGHT; ++i) {
         for (int j = 0; j < WIDTH; ++j) {
             std::cout << maze[i][j];
@@ -99,7 +119,6 @@ int main() {
             std::cout << "3. Settings\n";
             std::cout << "4. Quit\n";
 
-            // Input validation for main menu
             while (true) {
                 std::cout << "Enter your choice (1-4): ";
                 std::cin >> choice;
@@ -114,13 +133,10 @@ int main() {
 
         switch (choice) {
             case 1: { // Start Game
-                // Adjust the difficulty
+                // Adjust difficulty (if needed)
                 if (difficulty == 2) {
-                    // Increase maze size for medium difficulty
-                    maze[HEIGHT][WIDTH];
                     timerLimit = 45; // Less time on harder levels
                 } else if (difficulty == 3) {
-                    // Increase maze size for hard difficulty
                     timerLimit = 30; // Even less time
                 }
 
@@ -196,7 +212,6 @@ int main() {
                 std::cout << "2. Medium\n";
                 std::cout << "3. Hard\n";
 
-                // Input validation for difficulty
                 while (true) {
                     std::cin >> difficulty;
                     if (difficulty >= 1 && difficulty <= 3) {
