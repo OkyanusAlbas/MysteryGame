@@ -67,30 +67,41 @@ void initializeMaze() {
     // Create the maze paths starting from (1, 1)
     generateMaze(1, 1);
 
-    // Place the exit ('X')
-    maze[exitY][exitX] = 'X';
-
     // Place the player ('P')
     maze[playerY][playerX] = 'P';
-    
+
     // Place one enemy ('E') at random locations, avoiding player and exit
     int ex = rand() % (WIDTH - 2) + 1;
     int ey = rand() % (HEIGHT - 2) + 1;
-    if (maze[ey][ex] == ' ' && !(ex == playerX && ey == playerY) && !(ex == exitX && ey == exitY)) {
+    if (maze[ey][ex] == ' ' && !(ex == playerX && ey == playerY)) {
         enemy.x = ex;
         enemy.y = ey;
         maze[enemy.y][enemy.x] = 'E';  // Place the enemy in the maze
     }
 
-    // Place puzzles ('L') at random locations on walls
-    int puzzlesToPlace = 2;  // Number of puzzles to place
+    // Place puzzles ('L') at random locations on walls (#)
+    int puzzlesToPlace = 5;  // Number of puzzles to place
     for (int i = 0; i < puzzlesToPlace; ++i) {
-        int px = rand() % (WIDTH - 2) + 1;
-        int py = rand() % (HEIGHT - 2) + 1;
-        if (maze[py][px] == '#' && !(px == playerX && py == playerY) && !(px == exitX && py == exitY)) {
-            maze[py][px] = 'L';
-        } else {
-            --i;  // Retry if the position is invalid
+        int px, py;
+        do {
+            px = rand() % (WIDTH - 2) + 1;
+            py = rand() % (HEIGHT - 2) + 1;
+        } while (maze[py][px] != '#' || (px == playerX && py == playerY));  // Retry if position is invalid
+        maze[py][px] = 'L';
+    }
+
+    // Randomly place the exit ('X') on the walls
+    int exitPlaced = false;
+    while (!exitPlaced) {
+        int xRand = rand() % WIDTH;
+        int yRand = rand() % HEIGHT;
+
+        // Exit must be on a wall and not on the player or enemy
+        if (maze[yRand][xRand] == '#' && !(xRand == playerX && yRand == playerY) && !(xRand == enemy.x && yRand == enemy.y)) {
+            maze[yRand][xRand] = 'X';  // Place the exit
+            exitX = xRand;
+            exitY = yRand;
+            exitPlaced = true;
         }
     }
 }
