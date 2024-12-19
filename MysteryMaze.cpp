@@ -2,16 +2,16 @@
 #include <cstdlib>
 #include <ctime>
 #include <vector>
-#include <algorithm>  // For std::swap
-#include <chrono>     // For chrono functions
+#include <algorithm>  // For std::swap (used to shuffle directions)
+#include <chrono>     // For timing functions (used for countdown timer)
 #include <string>
 
 // Global variables for the maze dimensions and player position
 int WIDTH, HEIGHT;
-int playerX = 1, playerY = 1;  // Initial player position
-int exitX = 0, exitY = 0;  // Exit position
-int timerLimit = 60;  // Timer limit for the game
-char** maze;  // Maze array (dynamic)
+int playerX = 1, playerY = 1;  // Initial player position (1,1)
+int exitX = 0, exitY = 0;  // Exit position (initialized to 0,0)
+int timerLimit = 60;  // Timer limit for the game (60 seconds by default)
+char** maze;  // Maze array (dynamic, as it changes based on size)
 
 // Define an Enemy structure for easy manipulation
 struct Enemy {
@@ -21,7 +21,7 @@ struct Enemy {
 
 Enemy enemy;  // One enemy in the game
 
-// Function to manually shuffle directions
+// Function to manually shuffle directions (used to randomize maze paths)
 void manualShuffle(std::vector<int>& directions) {
     for (size_t i = 0; i < directions.size(); ++i) {
         int j = rand() % directions.size();
@@ -42,20 +42,22 @@ void generateMaze(int x, int y) {
     std::vector<int> directions = { 0, 1, 2, 3 };
     manualShuffle(directions);  // Call the manual shuffle function
 
+    // Loop through each direction to carve paths recursively
     for (int i = 0; i < 4; ++i) {
         int nx = x + dx[directions[i]] * 2;
         int ny = y + dy[directions[i]] * 2;
 
+        // Make sure the new cell is within bounds and is still a wall
         if (nx > 0 && nx < WIDTH - 1 && ny > 0 && ny < HEIGHT - 1 && maze[ny][nx] == '#') {
             maze[ny][nx] = ' ';  // Make a path
             maze[y + dy[directions[i]]][x + dx[directions[i]]] = ' ';  // Create a connection
 
-            generateMaze(nx, ny);  // Recurse to the next cell
+            generateMaze(nx, ny);  // Recurse to the next cell to generate the maze
         }
     }
 }
 
-// Function to initialize the maze with walls and enemies
+// Function to initialize the maze with walls, paths, enemies, puzzles, and power-ups
 void initializeMaze() {
     // Fill the maze with walls ('#')
     for (int i = 0; i < HEIGHT; ++i) {
@@ -67,10 +69,10 @@ void initializeMaze() {
     // Create the maze paths starting from (1, 1)
     generateMaze(1, 1);
 
-    // Place the player ('P')
+    // Place the player ('P') at the starting position
     maze[playerY][playerX] = 'P';
 
-    // Place one enemy ('E') at random locations, avoiding player and exit
+    // Place one enemy ('E') at a random location, avoiding player and exit
     int ex = rand() % (WIDTH - 2) + 1;
     int ey = rand() % (HEIGHT - 2) + 1;
     if (maze[ey][ex] == ' ' && !(ex == playerX && ey == playerY)) {
@@ -87,7 +89,7 @@ void initializeMaze() {
             px = rand() % (WIDTH - 2) + 1;
             py = rand() % (HEIGHT - 2) + 1;
         } while (maze[py][px] != '#' || (px == playerX && py == playerY));  // Retry if position is invalid
-        maze[py][px] = 'L';
+        maze[py][px] = 'L';  // Place a puzzle
     }
 
     // Place power-ups ('$') at random locations on walls (#)
@@ -132,16 +134,18 @@ void initializeMaze() {
     }
 }
 
-// Function to display the maze and timer
+// Function to display the maze and remaining time
 void displayMaze(int timeLeft) {
     #ifdef _WIN32
-        system("cls"); // Use "cls" for Windows
+        system("cls"); // Clear screen for Windows
     #else
-        system("clear"); // Use "clear" for Unix-based systems
+        system("clear"); // Clear screen for Unix-based systems
     #endif
 
+    // Display the time left on the screen
     std::cout << "Time left: " << timeLeft << " seconds\n\n";
 
+    // Print the entire maze row by row
     for (int i = 0; i < HEIGHT; ++i) {
         for (int j = 0; j < WIDTH; ++j) {
             std::cout << maze[i][j];
@@ -150,10 +154,11 @@ void displayMaze(int timeLeft) {
     }
 }
 
-// Function to check and move the player
+// Function to move the player based on input (WASD)
 void movePlayer(char direction) {
     int newX = playerX, newY = playerY;
 
+    // Update player position based on direction
     if (direction == 'w' || direction == 'W') {
         newY--;
     } else if (direction == 's' || direction == 'S') {
@@ -189,10 +194,10 @@ void movePlayer(char direction) {
             // The player collects a power-up
             std::cout << "You collected a power-up! The enemy is frozen for one move.\n";
             enemy.frozen = true;  // Freeze the enemy
-            maze[newY][newX] = ' ';  // Remove the power-up from the maze
+            maze[newY][newX] = ' ';  // Remove the power-up
         }
 
-        // Move the player
+        // Move the player to the new position
         maze[playerY][playerX] = ' ';
         playerX = newX;
         playerY = newY;
@@ -266,6 +271,7 @@ int main() {
             std::cout << "3. Settings\n";
             std::cout << "4. Quit\n";
 
+            // Input validation loop for menu selection
             while (true) {
                 std::cout << "Enter your choice (1-4): ";
                 std::cin >> choice;
@@ -278,6 +284,7 @@ int main() {
             }
         }
 
+        // Switch case to handle different menu options
         switch (choice) {
             case 1: { // Start Game
                 // Set maze size based on difficulty
@@ -295,7 +302,7 @@ int main() {
                     timerLimit = 60;
                 }
 
-                // Allocate memory for the maze
+                // Allocate memory for the maze dynamically
                 maze = new char*[HEIGHT];
                 for (int i = 0; i < HEIGHT; ++i) {
                     maze[i] = new char[WIDTH];
@@ -385,8 +392,13 @@ int main() {
                 return 0; // Exit the program
 
             default:
-                std::cout << "Invalid option.\n";
+                std::cout << "Invalid choice. Try again.\n";
                 break;
         }
+
+        // Reset inGame flag to false for the next loop
+        inGame = false;
     }
+
+    return 0;
 }
