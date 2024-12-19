@@ -101,6 +101,21 @@ void initializeMaze() {
             exitX = xRand;
             exitY = yRand;
             exitPlaced = true;
+
+            // Surround the exit with puzzles 'L'
+            // Ensure the cells adjacent to the exit are 'L' (puzzles)
+            for (int dx = -1; dx <= 1; ++dx) {
+                for (int dy = -1; dy <= 1; ++dy) {
+                    // Avoid placing 'L' directly on the exit (X) itself
+                    int nx = exitX + dx;
+                    int ny = exitY + dy;
+
+                    // Only place puzzle blocks if it's within bounds and is a wall
+                    if (nx >= 0 && nx < WIDTH && ny >= 0 && ny < HEIGHT && maze[ny][nx] == '#' && !(nx == exitX && ny == exitY)) {
+                        maze[ny][nx] = 'L';  // Place a puzzle
+                    }
+                }
+            }
         }
     }
 }
