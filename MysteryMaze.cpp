@@ -166,28 +166,47 @@ void movePlayer(char direction) {
     }
 }
 
-// Function to move the enemy towards the player
+// Function to move the enemy towards the player (fixed horizontal/vertical movement)
 void moveEnemy() {
     int dx = 0, dy = 0;
 
-    if (enemy.x < playerX) dx = 1;
-    else if (enemy.x > playerX) dx = -1;
+    // Move horizontally towards the player
+    if (enemy.x < playerX) {
+        dx = 1;  // Move right
+    } else if (enemy.x > playerX) {
+        dx = -1; // Move left
+    }
 
-    if (enemy.y < playerY) dy = 1;
-    else if (enemy.y > playerY) dy = -1;
+    // Move vertically towards the player
+    if (enemy.y < playerY) {
+        dy = 1;  // Move down
+    } else if (enemy.y > playerY) {
+        dy = -1; // Move up
+    }
 
-    // Check if the enemy can move in the selected direction (no walls)
-    if (maze[enemy.y + dy][enemy.x + dx] != '#' && maze[enemy.y + dy][enemy.x + dx] != 'E') {
-        maze[enemy.y][enemy.x] = ' ';  // Clear the old enemy position
-        enemy.x += dx;
-        enemy.y += dy;
-        maze[enemy.y][enemy.x] = 'E';  // Place enemy in new position
-
-        // Check if the enemy collides with the player
-        if (enemy.x == playerX && enemy.y == playerY) {
-            std::cout << "You were caught by the enemy! You lost!\n";
-            exit(0);  // End the game
+    // Prioritize horizontal movement if both horizontal and vertical movement is possible
+    if (dx != 0) {
+        // Check if the enemy can move horizontally (no walls)
+        if (maze[enemy.y][enemy.x + dx] != '#' && maze[enemy.y][enemy.x + dx] != 'E') {
+            maze[enemy.y][enemy.x] = ' ';  // Clear the old enemy position
+            enemy.x += dx;
+            maze[enemy.y][enemy.x] = 'E';  // Place enemy in new position
         }
+    }
+    
+    if (dy != 0) {
+        // Check if the enemy can move vertically (no walls)
+        if (maze[enemy.y + dy][enemy.x] != '#' && maze[enemy.y + dy][enemy.x] != 'E') {
+            maze[enemy.y][enemy.x] = ' ';  // Clear the old enemy position
+            enemy.y += dy;
+            maze[enemy.y][enemy.x] = 'E';  // Place enemy in new position
+        }
+    }
+
+    // Check if the enemy collides with the player
+    if (enemy.x == playerX && enemy.y == playerY) {
+        std::cout << "You were caught by the enemy! You lost!\n";
+        exit(0);  // End the game
     }
 }
 
@@ -257,7 +276,7 @@ int main() {
 
                     if (timeLeft <= 0) {
                         std::cout << "Time's up! You failed to escape the maze.\n";
-                        break;
+                        break; // Exit the loop if time is up
                     }
 
                     // Display the maze with player and timer
@@ -284,7 +303,7 @@ int main() {
                     if (playerX == exitX && playerY == exitY) {
                         std::cout << "Congratulations! You've escaped the maze!\n";
                         escaped = true;
-                        break;
+                        break; // Exit the loop if player escapes
                     }
                 }
 
@@ -323,7 +342,7 @@ int main() {
 
             case 4: // Quit
                 std::cout << "Thanks for playing!\n";
-                return 0;
+                return 0; // Exit the program
 
             default:
                 std::cout << "Invalid option.\n";
