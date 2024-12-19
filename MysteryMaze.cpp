@@ -16,6 +16,7 @@ char** maze;  // Maze array (dynamic)
 // Define an Enemy structure for easy manipulation
 struct Enemy {
     int x, y;
+    bool frozen = false;  // Freeze state for the enemy
 };
 
 Enemy enemy;  // One enemy in the game
@@ -87,6 +88,17 @@ void initializeMaze() {
             py = rand() % (HEIGHT - 2) + 1;
         } while (maze[py][px] != '#' || (px == playerX && py == playerY));  // Retry if position is invalid
         maze[py][px] = 'L';
+    }
+
+    // Place power-ups ('$') at random locations on walls (#)
+    int powerUpsToPlace = 3;  // Number of power-ups to place
+    for (int i = 0; i < powerUpsToPlace; ++i) {
+        int px, py;
+        do {
+            px = rand() % (WIDTH - 2) + 1;
+            py = rand() % (HEIGHT - 2) + 1;
+        } while (maze[py][px] != '#' || (px == playerX && py == playerY));  // Retry if position is invalid
+        maze[py][px] = '$';  // Place a power-up
     }
 
     // Randomly place the exit ('X') on the walls
@@ -173,6 +185,13 @@ void movePlayer(char direction) {
             }
         }
 
+        if (maze[newY][newX] == '$') {
+            // The player collects a power-up
+            std::cout << "You collected a power-up! The enemy is frozen for one move.\n";
+            enemy.frozen = true;  // Freeze the enemy
+            maze[newY][newX] = ' ';  // Remove the power-up from the maze
+        }
+
         // Move the player
         maze[playerY][playerX] = ' ';
         playerX = newX;
@@ -183,6 +202,12 @@ void movePlayer(char direction) {
 
 // Function to move the enemy towards the player (fixed horizontal/vertical movement)
 void moveEnemy() {
+    if (enemy.frozen) {
+        std::cout << "The enemy is frozen for one move!\n";
+        enemy.frozen = false;  // Unfreeze the enemy after one move
+        return;
+    }
+
     int dx = 0, dy = 0;
 
     // Move horizontally towards the player
@@ -259,7 +284,7 @@ int main() {
                 if (difficulty == 1) {
                     WIDTH = 10;
                     HEIGHT = 10;
-                    timerLimit = 60;
+                    timerLimit = 30;
                 } else if (difficulty == 2) {
                     WIDTH = 20;
                     HEIGHT = 20;
@@ -267,7 +292,7 @@ int main() {
                 } else if (difficulty == 3) {
                     WIDTH = 30;
                     HEIGHT = 30;
-                    timerLimit = 30;
+                    timerLimit = 60;
                 }
 
                 // Allocate memory for the maze
@@ -276,7 +301,7 @@ int main() {
                     maze[i] = new char[WIDTH];
                 }
 
-                // Initialize maze with walls, paths, enemies, and puzzles
+                // Initialize maze with walls, paths, enemies, puzzles, and power-ups
                 initializeMaze();
 
                 // Game loop with timer
@@ -336,7 +361,7 @@ int main() {
             }
 
             case 2: // Instructions
-                std::cout << "Use WASD (lowercase or uppercase) to move. Avoid enemies and solve puzzles!\n";
+                std::cout << "Use WASD (lowercase or uppercase) to move. Avoid enemies, solve puzzles, and collect power-ups!\n";
                 break;
 
             case 3: // Settings (difficulty selection)
