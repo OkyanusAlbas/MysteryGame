@@ -1,13 +1,6 @@
-
-Quick path to paste For Developer ONLY
-
-cd users/albao/documents/dev/MysteryMaze
-g++ -std=c++11 -o MysteryMaze MysteryMaze.cpp
-.\MysteryMaze.exe
-
 # Maze Escape Game
 
-Welcome to the **Maze Escape Game**, a maze puzzle game where you need to navigate through a maze to reach the exit while avoiding enemies, solving puzzles, and collecting power-ups. 
+Welcome to the **Maze Escape Game**, a maze puzzle game where you need to navigate through a maze to reach the exit while avoiding enemies, solving puzzles, and collecting power-ups.
 
 ## Table of Contents
 
@@ -15,7 +8,9 @@ Welcome to the **Maze Escape Game**, a maze puzzle game where you need to naviga
 2. [Algorithm Overview](#algorithm-overview)
 3. [Code Explanation](#code-explanation)
 4. [Game Features](#game-features)
-5. [Credits](#credits)
+5. [Bugs and Issues](#bugs-and-issues)
+6. [Credits](#credits)
+7. [How to Compile and Run the Game](#how-to-compile-and-run-the-game)
 
 ---
 
@@ -107,21 +102,109 @@ If the player does not reach the exit before time runs out, the game ends.
 
 ---
 
+## Bugs and Issues
+
+While the game is fully playable, there are a few bugs and issues that may affect gameplay. These are actively being worked on for future improvements.
+
+### 1. **Enemy AI May Get Stuck in Walls**
+   - **Issue**: Occasionally, the enemy AI may get stuck or move in a way that causes it to collide with walls, making it unable to move toward the player.
+   - **Status**: This issue is sporadic and happens under specific conditions where the maze layout limits the enemy’s movement choices.
+   - **Workaround**: Currently, no direct workaround is available other than restarting the game. I am working on improving the pathfinding algorithm to prevent this from happening.
+   - **Fix**: I am refining the enemy AI to handle movement more effectively and avoid getting stuck in walls.
+
+### 2. **Puzzle Block ('L') Not Clearing After Passing**
+   - **Issue**: Sometimes after the player solves a puzzle, the puzzle block ('L') doesn’t disappear, making it impossible to pass through again.
+   - **Status**: This happens intermittently when the puzzle question is answered correctly, but the block remains in place.
+   - **Workaround**: If this issue occurs, the player should attempt to move in a different direction or restart the game.
+   - **Fix**: I am working on to ensure puzzle blocks are correctly cleared after a correct answer.
+
+### 3. **Power-Ups Not Freezing Enemy Correctly**
+   - **Issue**: In some instances, collecting a power-up doesn't properly freeze the enemy for the expected number of turns.
+   - **Status**: This bug may arise due to timing issues or conflicts with other game mechanics such as player movement or enemy behavior updates.
+   - **Workaround**: The game will still function, but the freeze might last for an unexpected number of turns. The enemy might also unfreeze prematurely.
+   - **Fix**: I am investigating the issue and planning a fix to ensure power-ups behave as expected.
+
+### 4. **Maze Boundaries May Cause Out-of-Bounds Errors**
+   - **Issue**: Occasionally, the player or enemy might attempt to move outside the boundaries of the maze, leading to an out-of-bounds error or undefined behavior.
+   - **Status**: This happens when either the player or the enemy gets too close to the edge of the maze, where checks for boundary conditions may not be handled properly.
+   - **Workaround**: Avoid moving too close to the edges of the maze. Future updates will improve boundary handling to prevent this error.
+   - **Fix**: The game’s boundary checks are being adjusted to prevent out-of-bounds behavior.
+
+### 5. **Game Timer Display May Flicker**
+   - **Issue**: On some systems, the timer display may flicker or update inconsistently, making it difficult to track the remaining time.
+   - **Status**: This is an issue with how the game’s display is cleared and updated in real-time, particularly on certain platforms.
+   - **Workaround**: No immediate workaround for the timer flicker, but the game still works as expected despite the visual glitch.
+   - **Fix**: I am working on improving the display update logic to make the timer display more consistent.
+
+### 6. **Enemy Sometimes Doesn't Spawn**
+   - **Issue**: Occasionally, the enemy fails to spawn in the maze during initialization, leaving the player without an opponent.
+   - **Status**: This issue happens when the random placement logic for the enemy doesn’t find a valid position, possibly due to maze constraints or random placement conflicts.
+   - **Workaround**: Restarting the game may resolve the issue. I am working on improving the enemy spawn logic to ensure it always occurs properly.
+   - **Fix**: Updates are being made to ensure that the enemy always spawns in a valid location.
+
+### 7. **Player Can Spawn Surrounded by Walls**
+   - **Issue**: In some cases, the player might spawn in a position surrounded by walls, making it impossible to move.
+   - **Status**: This happens due to a flaw in the maze generation algorithm, where paths are not always fully guaranteed to surround the player’s spawn point.
+   - **Workaround**: Restarting the game may help, as the player may spawn in a more favorable location.
+   - **Fix**: The maze generation algorithm is being improved to ensure that the player never spawns surrounded by walls.
+
+### 8. **Game Enters an Infinite Loop When Movement Key is Pressed Instead of Answering Puzzle**
+   - **Issue**: If the player is prompted to solve a puzzle and accidentally presses a movement key (WASD) or any other key instead of the correct answer, the game enters an infinite loop, failing to continue properly.
+   - **Status**: This is caused by improper input handling, where the game logic doesn’t account for non-answer key presses during the puzzle phase, causing an unexpected loop.
+   - **Workaround**: The player should ensure to input the correct answer to avoid this. Future updates will add input validation to prevent this issue from interrupting the game flow.
+   - **Fix**: A fix is in progress to handle invalid inputs more effectively and ensure smooth gameplay.
+
+### 9. **No Escape Path Due to Enemy Spawn Location**
+   - **Issue**: Sometimes, the maze is generated in a way that the player cannot escape from the enemy due to the enemy’s spawn location, effectively trapping the player in the maze.
+   - **Status**: This happens when the maze and enemy spawn points are not fully independent, leading to rare cases where the enemy is placed too close to the player.
+   - **Workaround**: Restart the game or adjust movement to try and escape.
+   - **Fix**: Future updates will ensure that the enemy and player do not start too close to each other.
+
+---
+
 ## Credits
 
-This game was created by [Okyanus Albas]. Special thanks to all the open-source libraries and resources that helped in the creation of this game.
+The **Maze Escape Game** wouldn't have been possible without the contributions and resources of the following:
+
+- **Game Design**: The core gameplay and mechanics were conceptualized and designed by Okyanus Albas.
+- **Maze Generation Algorithm**: Special thanks to [https://stackoverflow.com/questions/42811988/recursive-backtracking-in-c] for the recursive backtracking maze generation algorithm that ensures each maze is unique and challenging.
+- **Enemy AI**: The enemy behavior was inspired by classic pursuit algorithms, specifically the Manhattan distance algorithm.
+- **Puzzle Design**: The simple math puzzles were created to offer a mix of challenge and fun, with inspiration from Specification Guide on puzzles from our coursework.
+- **Testing and Feedback**: Special thanks to [Okyanus Albas and Nills] for their invaluable feedback and bug reports that helped improve the game.
+
+We also want to acknowledge the use of the following open-source libraries/tools:
+
+#include <iostream>   // Provides input and output functionality, such as printing to the console and reading input from the user.
+
+#include <cstdlib>    // Includes functions for general utilities, such as random number generation (e.g., rand() for randomness).
+
+#include <ctime>      // Used for handling date and time, such as seeding random number generation with the current time.
+
+#include <vector>     // The std::vector container is used for dynamic arrays to store and manipulate data like the maze elements.
+
+#include <algorithm>  // Contains algorithms like std::swap, which is used for shuffling directions during maze generation.
+
+#include <chrono>     // Provides functionality for working with time, including the countdown timer and time-based operations.
+
+#include <string>     // Provides support for manipulating strings, which is useful for input handling, such as solving puzzles.
 
 ---
 
-## How to Run the Game
+## How to Compile and Run the Game
 
-1. Clone this repository to your local machine.
-2. Open the terminal or command prompt.
-3. Navigate to the folder containing the project.
-4. Compile the game using a C++ compiler (e.g., `g++ -std=c++11 -o MysteryMaze MysteryMaze.cpp`).
-5. Run the compiled program (`./MysteryMaze.exe` on Unix or `.\MysteryMaze.exe` on Windows).
-6. Enjoy playing!
+### Quick Path for Developers ONLY
 
----
+1. Open a terminal or command prompt.
 
-## License
+2. Navigate to the project directory:
+    OpenDeveleoper Command Prompt for VS 2022
+    cd into where you downlaoded the game.
+    cd users/albao/documents/dev/MysteryMaze
+
+3. How to Compile
+    g++ -std=c++11 -o MysteryMaze MysteryMaze.cpp
+4. Run the game using:
+    Windows Systems
+        .\MysteryMaze.exe
+    UNIX Systems
+        ./MysteryMaze
