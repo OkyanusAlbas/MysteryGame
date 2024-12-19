@@ -7,12 +7,11 @@
 #include <string>
 
 // Global variables for the maze dimensions and player position
-const int WIDTH = 20;
-const int HEIGHT = 10;
+int WIDTH, HEIGHT;
 int playerX = 1, playerY = 1;  // Initial player position
-int exitX = WIDTH - 2, exitY = HEIGHT - 2;  // Exit position
+int exitX = 0, exitY = 0;  // Exit position
 int timerLimit = 60;  // Timer limit for the game
-char maze[HEIGHT][WIDTH];  // Maze array
+char** maze;  // Maze array (dynamic)
 
 // Define an Enemy structure for easy manipulation
 struct Enemy {
@@ -106,13 +105,15 @@ void initializeMaze() {
     }
 }
 
-// Function to display the maze
-void displayMaze() {
+// Function to display the maze and timer
+void displayMaze(int timeLeft) {
     #ifdef _WIN32
         system("cls"); // Use "cls" for Windows
     #else
         system("clear"); // Use "clear" for Unix-based systems
     #endif
+
+    std::cout << "Time left: " << timeLeft << " seconds\n\n";
 
     for (int i = 0; i < HEIGHT; ++i) {
         for (int j = 0; j < WIDTH; ++j) {
@@ -220,11 +221,25 @@ int main() {
 
         switch (choice) {
             case 1: { // Start Game
-                // Adjust difficulty (if needed)
-                if (difficulty == 2) {
-                    timerLimit = 45; // Less time on harder levels
+                // Set maze size based on difficulty
+                if (difficulty == 1) {
+                    WIDTH = 10;
+                    HEIGHT = 10;
+                    timerLimit = 60;
+                } else if (difficulty == 2) {
+                    WIDTH = 20;
+                    HEIGHT = 20;
+                    timerLimit = 45;
                 } else if (difficulty == 3) {
-                    timerLimit = 30; // Even less time
+                    WIDTH = 30;
+                    HEIGHT = 30;
+                    timerLimit = 30;
+                }
+
+                // Allocate memory for the maze
+                maze = new char*[HEIGHT];
+                for (int i = 0; i < HEIGHT; ++i) {
+                    maze[i] = new char[WIDTH];
                 }
 
                 // Initialize maze with walls, paths, enemies, and puzzles
@@ -238,14 +253,15 @@ int main() {
                     // Timer check
                     auto now = std::chrono::steady_clock::now();
                     auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - start).count();
+                    int timeLeft = timerLimit - elapsed;
 
-                    if (elapsed > timerLimit) {
+                    if (timeLeft <= 0) {
                         std::cout << "Time's up! You failed to escape the maze.\n";
                         break;
                     }
 
-                    // Display the maze with player
-                    displayMaze();
+                    // Display the maze with player and timer
+                    displayMaze(timeLeft);
 
                     // Ask player to move or exit
                     char direction;
@@ -271,6 +287,12 @@ int main() {
                         break;
                     }
                 }
+
+                // Clean up dynamically allocated maze memory
+                for (int i = 0; i < HEIGHT; ++i) {
+                    delete[] maze[i];
+                }
+                delete[] maze;
 
                 if (!escaped) {
                     std::cout << "Game Over!\n";
