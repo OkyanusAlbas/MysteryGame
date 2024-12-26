@@ -203,6 +203,9 @@ We also want to acknowledge the use of the following open-source libraries/tools
 
 3. How to Compile
     g++ -std=c++11 -o MysteryMaze MysteryMaze.cpp
+
+    g++ -o MysteryMaze.exe MysteryMaze.cpp -static-libgcc -static-libstdc++
+
 4. Run the game using:
     Windows Systems
         .\MysteryMaze.exe
