@@ -24,12 +24,17 @@ Enemy enemy;  // One enemy in the game
 // Function to manually shuffle directions (used to randomize maze paths)
 void manualShuffle(std::vector<int>& directions) {
     for (size_t i = 0; i < directions.size(); ++i) {
-        int j = rand() % directions.size();
+        int j = rand() % directions.size();  // Generate a random index
         std::swap(directions[i], directions[j]);  // Swap elements to shuffle
     }
 }
 
-// Function to generate the maze with 2-block wide corridors
+/***********************************************************************
+ * Function to generate the maze with paths, walls, and exits.
+ * This function uses a depth-first search (DFS) approach to carve out the maze.
+ * It starts from the point (x, y) and creates paths by marking cells as open (' ').
+ * The maze is created with 2-block wide corridors, and walls are represented by '#'.
+ ***********************************************************************/
 void generateMaze(int x, int y) {
     // Directions (up, down, left, right)
     int dx[] = { 0, 0, -1, 1 };
@@ -44,8 +49,8 @@ void generateMaze(int x, int y) {
 
     // Loop through each direction to carve paths recursively
     for (int i = 0; i < 4; ++i) {
-        int nx = x + dx[directions[i]] * 2;
-        int ny = y + dy[directions[i]] * 2;
+        int nx = x + dx[directions[i]] * 2;  // Calculate the new x-coordinate
+        int ny = y + dy[directions[i]] * 2;  // Calculate the new y-coordinate
 
         // Make sure the new cell is within bounds and is still a wall
         if (nx > 0 && nx < WIDTH - 1 && ny > 0 && ny < HEIGHT - 1 && maze[ny][nx] == '#') {
@@ -57,27 +62,32 @@ void generateMaze(int x, int y) {
     }
 }
 
-// Function to initialize the maze with walls, paths, enemies, puzzles, and power-ups
+/***********************************************************************
+ * Function to initialize the maze with walls, paths, enemies, puzzles,
+ * and power-ups.
+ * The maze is generated, and additional elements such as power-ups, puzzles, 
+ * and the exit are placed randomly within the maze.
+ ***********************************************************************/
 void initializeMaze() {
     // Fill the maze with walls ('#')
     for (int i = 0; i < HEIGHT; ++i) {
         for (int j = 0; j < WIDTH; ++j) {
-            maze[i][j] = '#';
+            maze[i][j] = '#';  // Place walls at all locations initially
         }
     }
 
     // Create the maze paths starting from (1, 1)
-    generateMaze(1, 1);
+    generateMaze(1, 1);  // Start maze generation from (1, 1)
 
     // Place the player ('P') at the starting position
-    maze[playerY][playerX] = 'P';
+    maze[playerY][playerX] = 'P';  // Player's initial position is marked as 'P'
 
     // Place one enemy ('E') at a random location, avoiding player and exit
-    int ex = rand() % (WIDTH - 2) + 1;
-    int ey = rand() % (HEIGHT - 2) + 1;
-    if (maze[ey][ex] == ' ' && !(ex == playerX && ey == playerY)) {
-        enemy.x = ex;
-        enemy.y = ey;
+    int ex = rand() % (WIDTH - 2) + 1;  // Random x-coordinate for enemy
+    int ey = rand() % (HEIGHT - 2) + 1;  // Random y-coordinate for enemy
+    if (maze[ey][ex] == ' ' && !(ex == playerX && ey == playerY)) {  // Check if the position is valid
+        enemy.x = ex;  // Set enemy's x-coordinate
+        enemy.y = ey;  // Set enemy's y-coordinate
         maze[enemy.y][enemy.x] = 'E';  // Place the enemy in the maze
     }
 
@@ -86,8 +96,8 @@ void initializeMaze() {
     for (int i = 0; i < puzzlesToPlace; ++i) {
         int px, py;
         do {
-            px = rand() % (WIDTH - 2) + 1;
-            py = rand() % (HEIGHT - 2) + 1;
+            px = rand() % (WIDTH - 2) + 1;  // Random x-coordinate for puzzle
+            py = rand() % (HEIGHT - 2) + 1;  // Random y-coordinate for puzzle
         } while (maze[py][px] != '#' || (px == playerX && py == playerY));  // Retry if position is invalid
         maze[py][px] = 'L';  // Place a puzzle
     }
@@ -97,8 +107,8 @@ void initializeMaze() {
     for (int i = 0; i < powerUpsToPlace; ++i) {
         int px, py;
         do {
-            px = rand() % (WIDTH - 2) + 1;
-            py = rand() % (HEIGHT - 2) + 1;
+            px = rand() % (WIDTH - 2) + 1;  // Random x-coordinate for power-up
+            py = rand() % (HEIGHT - 2) + 1;  // Random y-coordinate for power-up
         } while (maze[py][px] != '#' || (px == playerX && py == playerY));  // Retry if position is invalid
         maze[py][px] = '$';  // Place a power-up
     }
@@ -106,23 +116,23 @@ void initializeMaze() {
     // Randomly place the exit ('X') on the walls
     int exitPlaced = false;
     while (!exitPlaced) {
-        int xRand = rand() % WIDTH;
-        int yRand = rand() % HEIGHT;
+        int xRand = rand() % WIDTH;  // Random x-coordinate for exit
+        int yRand = rand() % HEIGHT;  // Random y-coordinate for exit
 
         // Exit must be on a wall and not on the player or enemy
         if (maze[yRand][xRand] == '#' && !(xRand == playerX && yRand == playerY) && !(xRand == enemy.x && yRand == enemy.y)) {
             maze[yRand][xRand] = 'X';  // Place the exit
-            exitX = xRand;
-            exitY = yRand;
-            exitPlaced = true;
+            exitX = xRand;  // Set exit's x-coordinate
+            exitY = yRand;  // Set exit's y-coordinate
+            exitPlaced = true;  // Exit placement is successful
 
             // Surround the exit with puzzles 'L'
             // Ensure the cells adjacent to the exit are 'L' (puzzles)
             for (int dx = -1; dx <= 1; ++dx) {
                 for (int dy = -1; dy <= 1; ++dy) {
                     // Avoid placing 'L' directly on the exit (X) itself
-                    int nx = exitX + dx;
-                    int ny = exitY + dy;
+                    int nx = exitX + dx;  // Calculate adjacent x-coordinate
+                    int ny = exitY + dy;  // Calculate adjacent y-coordinate
 
                     // Only place puzzle blocks if it's within bounds and is a wall
                     if (nx >= 0 && nx < WIDTH && ny >= 0 && ny < HEIGHT && maze[ny][nx] == '#' && !(nx == exitX && ny == exitY)) {
@@ -134,7 +144,12 @@ void initializeMaze() {
     }
 }
 
-// Function to display the maze and remaining time
+/***********************************************************************
+ * Function to display the current maze and the remaining time.
+ * The maze is printed line-by-line, showing the player position, enemies,
+ * and other elements such as puzzles, power-ups, and the exit.
+ * The remaining time is displayed at the top of the maze.
+ ***********************************************************************/
 void displayMaze(int timeLeft) {
     #ifdef _WIN32
         system("cls"); // Clear screen for Windows
@@ -148,25 +163,30 @@ void displayMaze(int timeLeft) {
     // Print the entire maze row by row
     for (int i = 0; i < HEIGHT; ++i) {
         for (int j = 0; j < WIDTH; ++j) {
-            std::cout << maze[i][j];
+            std::cout << maze[i][j];  // Display each character in the maze
         }
-        std::cout << std::endl;
+        std::cout << std::endl;  // Newline after each row
     }
 }
 
-// Function to move the player based on input (WASD)
+/***********************************************************************
+ * Function to move the player based on user input (WASD).
+ * The player moves in the corresponding direction unless blocked by walls.
+ * Puzzles ('L') require the player to solve them before moving past them.
+ * Power-ups ('$', which freeze the enemy) can be collected during movement.
+ ***********************************************************************/
 void movePlayer(char direction) {
     int newX = playerX, newY = playerY;
 
     // Update player position based on direction
     if (direction == 'w' || direction == 'W') {
-        newY--;
+        newY--;  // Move up
     } else if (direction == 's' || direction == 'S') {
-        newY++;
+        newY++;  // Move down
     } else if (direction == 'a' || direction == 'A') {
-        newX--;
+        newX--;  // Move left
     } else if (direction == 'd' || direction == 'D') {
-        newX++;
+        newX++;  // Move right
     }
 
     // Check if the new position is valid (not a wall or out of bounds)
@@ -198,14 +218,19 @@ void movePlayer(char direction) {
         }
 
         // Move the player to the new position
-        maze[playerY][playerX] = ' ';
-        playerX = newX;
-        playerY = newY;
+        maze[playerY][playerX] = ' ';  // Clear the old player position
+        playerX = newX;  // Set the player's new x-coordinate
+        playerY = newY;  // Set the player's new y-coordinate
         maze[playerY][playerX] = 'P';  // Place player at new position
     }
 }
 
-// Function to move the enemy towards the player (fixed horizontal/vertical movement)
+/***********************************************************************
+ * Function to move the enemy towards the player.
+ * The enemy moves one step at a time, either horizontally or vertically.
+ * If the enemy collides with the player, the game ends.
+ * If the enemy is frozen (due to power-up), it skips its move.
+ ***********************************************************************/
 void moveEnemy() {
     if (enemy.frozen) {
         std::cout << "The enemy is frozen for one move!\n";
@@ -234,7 +259,7 @@ void moveEnemy() {
         // Check if the enemy can move horizontally (no walls)
         if (maze[enemy.y][enemy.x + dx] != '#' && maze[enemy.y][enemy.x + dx] != 'E') {
             maze[enemy.y][enemy.x] = ' ';  // Clear the old enemy position
-            enemy.x += dx;
+            enemy.x += dx;  // Move the enemy horizontally
             maze[enemy.y][enemy.x] = 'E';  // Place enemy in new position
         }
     }
@@ -243,162 +268,117 @@ void moveEnemy() {
         // Check if the enemy can move vertically (no walls)
         if (maze[enemy.y + dy][enemy.x] != '#' && maze[enemy.y + dy][enemy.x] != 'E') {
             maze[enemy.y][enemy.x] = ' ';  // Clear the old enemy position
-            enemy.y += dy;
+            enemy.y += dy;  // Move the enemy vertically
             maze[enemy.y][enemy.x] = 'E';  // Place enemy in new position
         }
     }
-
-    // Check if the enemy collides with the player
-    if (enemy.x == playerX && enemy.y == playerY) {
-        std::cout << "You were caught by the enemy! You lost!\n";
-        exit(0);  // End the game
-    }
 }
 
-// Main game loop
+/***********************************************************************
+ * Main game loop.
+ * The user can choose between starting a new game, reading instructions,
+ * changing settings, or quitting. In the game mode, the player uses WASD to
+ * move, the timer counts down, and the game ends if the player reaches the exit 
+ * or if time runs out.
+ ***********************************************************************/
 int main() {
-    srand(time(0)); // Seed the random number generator
-    int choice;
+    srand(static_cast<unsigned int>(time(0)));  // Seed the random number generator
+
     bool inGame = false;
-    int difficulty = 1; // Default difficulty: 1 (Easy)
+    int difficulty = 2;  // Default difficulty (medium)
 
     // Main menu loop
     while (true) {
-        if (!inGame) {
-            std::cout << "\nMain Menu:\n";
-            std::cout << "1. Start Game\n";
-            std::cout << "2. Instructions\n";
-            std::cout << "3. Settings\n";
-            std::cout << "4. Quit\n";
+        std::cout << "1. Start Game\n";
+        std::cout << "2. Instructions\n";
+        std::cout << "3. Settings\n";
+        std::cout << "4. Quit\n";
+        std::cout << "Select an option (1-4): ";
+        int choice;
+        std::cin >> choice;
 
-            // Input validation loop for menu selection
-            while (true) {
-                std::cout << "Enter your choice (1-4): ";
-                std::cin >> choice;
-
-                if (choice >= 1 && choice <= 4) {
-                    break; // Valid input, break the loop
-                } else {
-                    std::cout << "Invalid input. Please enter a number between 1 and 4.\n";
-                }
-            }
-        }
-
-        // Switch case to handle different menu options
         switch (choice) {
-            case 1: { // Start Game
-                // Set maze size based on difficulty
-                if (difficulty == 1) {
-                    WIDTH = 10;
-                    HEIGHT = 10;
-                    timerLimit = 30;
-                } else if (difficulty == 2) {
-                    WIDTH = 20;
-                    HEIGHT = 20;
-                    timerLimit = 45;
-                } else if (difficulty == 3) {
-                    WIDTH = 30;
-                    HEIGHT = 30;
-                    timerLimit = 60;
+            case 1: {  // Start Game
+                // Set maze dimensions based on difficulty
+                if (difficulty == 1) {  // Easy
+                    WIDTH = 20; HEIGHT = 10;
+                } else if (difficulty == 2) {  // Medium
+                    WIDTH = 40; HEIGHT = 20;
+                } else {  // Hard
+                    WIDTH = 60; HEIGHT = 30;
                 }
 
-                // Allocate memory for the maze dynamically
+                // Allocate memory for the maze
                 maze = new char*[HEIGHT];
                 for (int i = 0; i < HEIGHT; ++i) {
                     maze[i] = new char[WIDTH];
                 }
 
-                // Initialize maze with walls, paths, enemies, puzzles, and power-ups
+                // Initialize the maze
                 initializeMaze();
 
-                // Game loop with timer
-                auto start = std::chrono::steady_clock::now();
-                bool escaped = false;
+                // Timer setup
+                auto start = std::chrono::high_resolution_clock::now();
+                int timeLeft = timerLimit;
 
-                while (true) {
-                    // Timer check
-                    auto now = std::chrono::steady_clock::now();
-                    auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - start).count();
-                    int timeLeft = timerLimit - elapsed;
+                // Game loop
+                while (timeLeft > 0) {
+                    // Calculate the time left by comparing to the start time
+                    auto now = std::chrono::high_resolution_clock::now();
+                    std::chrono::duration<int> elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - start);
+                    timeLeft = timerLimit - elapsed.count();
 
-                    if (timeLeft <= 0) {
-                        std::cout << "Time's up! You failed to escape the maze.\n";
-                        break; // Exit the loop if time is up
-                    }
-
-                    // Display the maze with player and timer
+                    // Display the maze with the remaining time
                     displayMaze(timeLeft);
 
-                    // Ask player to move or exit
-                    char direction;
-                    std::cout << "Move (WASD) or press E to Exit: ";
-                    std::cin >> direction;
+                    // Handle player input for movement
+                    char move;
+                    std::cout << "Use WASD to move: ";
+                    std::cin >> move;
 
-                    // Handle player movement
-                    if (direction == 'e' || direction == 'E') {
-                        std::cout << "Exiting to Main Menu...\n";
-                        break; // Exit the game and return to main menu
-                    }
+                    movePlayer(move);  // Move the player based on input
+                    moveEnemy();  // Move the enemy towards the player
 
-                    // Move the player based on the input (case insensitive)
-                    movePlayer(direction);
-
-                    // Move the enemy towards the player
-                    moveEnemy();
-
-                    // Check if player reaches the exit
+                    // Check if player reached the exit
                     if (playerX == exitX && playerY == exitY) {
-                        std::cout << "Congratulations! You've escaped the maze!\n";
-                        escaped = true;
-                        break; // Exit the loop if player escapes
+                        std::cout << "Congratulations! You escaped the maze!\n";
+                        break;  // Player has escaped successfully
                     }
                 }
 
-                // Clean up dynamically allocated maze memory
+                // Clean up the dynamically allocated memory for the maze
                 for (int i = 0; i < HEIGHT; ++i) {
                     delete[] maze[i];
                 }
                 delete[] maze;
 
-                if (!escaped) {
-                    std::cout << "Game Over!\n";
-                }
-
+                // Reset the game state
+                inGame = false;
                 break;
             }
-
-            case 2: // Instructions
-                std::cout << "Use WASD (lowercase or uppercase) to move. Avoid enemies, solve puzzles, and collect power-ups!\n";
+            case 2: {  // Instructions
+                std::cout << "\nInstructions:\n";
+                std::cout << "1. Use WASD keys to navigate through the maze.\n";
+                std::cout << "2. Collect power-ups ('$') to freeze the enemy for one move.\n";
+                std::cout << "3. Solve puzzles (L) to unlock paths.\n";
+                std::cout << "4. Reach the exit (X) before time runs out to win.\n";
+                std::cout << "5. Avoid the enemy (E) that tries to catch you.\n\n";
                 break;
-
-            case 3: // Settings (difficulty selection)
-                std::cout << "Select Difficulty:\n";
+            }
+            case 3: {  // Settings
+                // Allow player to choose difficulty
+                std::cout << "\nSettings:\n";
                 std::cout << "1. Easy\n";
                 std::cout << "2. Medium\n";
                 std::cout << "3. Hard\n";
-
-                while (true) {
-                    std::cin >> difficulty;
-                    if (difficulty >= 1 && difficulty <= 3) {
-                        break; // Valid input, break the loop
-                    } else {
-                        std::cout << "Invalid input. Please select a difficulty between 1 and 3.\n";
-                    }
-                }
+                std::cout << "Select difficulty (1-3): ";
+                std::cin >> difficulty;
                 break;
-
-            case 4: // Quit
-                std::cout << "Thanks for playing!\n";
-                return 0; // Exit the program
-
-            default:
-                std::cout << "Invalid choice. Try again.\n";
-                break;
+            }
+            case 4: {  // Quit
+                std::cout << "Thanks for playing! Goodbye.\n";
+                return 0;  // Exit the program
+            }
         }
-
-        // Reset inGame flag to false for the next loop
-        inGame = false;
     }
-
-    return 0;
 }
